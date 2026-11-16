@@ -1,0 +1,4 @@
+{
+  "variant": "user1088",
+  "schema": "# Схема наскрізного магазину (для threat modeling)\nFrontend (SPA)  -> API Gateway -> Order Service -> Payment Service (3rd party)\n                                              \\-> Auth Service (видає JWT)\n                                              \\-> Database (users, orders)\nМежі довіри:\n  браузер<->frontend ; frontend<->gateway ; сервіс<->сервіс ;\n  застосунок<->БД ; застосунок<->платіжний провайдер\nВнутрішні виклики зараз: без перевірки токена сервісу (довіра «з мережі»).\n"
+}

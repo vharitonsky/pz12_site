@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Практична 12 — персональне завдання</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#15181d; --muted:#5a6472;
+    --line:#e3e7ec; --accent:#0563bb; --code:#0b7a33; --warn:#9a3b1b; --chip:#eef2f7;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f1216; --card:#171b21; --ink:#e7ebf0; --muted:#9aa5b1;
+    --line:#2a313a; --accent:#5aa2e8; --code:#5bd18a; --warn:#e2975f; --chip:#222832;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0f1216; --card:#171b21; --ink:#e7ebf0; --muted:#9aa5b1;
+    --line:#2a313a; --accent:#5aa2e8; --code:#5bd18a; --warn:#e2975f; --chip:#222832;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 16px 64px}
+  h1{font-size:1.6rem;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0}
+  label{display:block;font-weight:600;margin-bottom:8px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  input[type=text]{font-size:1rem;padding:9px 11px;border:1px solid var(--line);
+    border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+  #num{flex:1;min-width:160px;font-size:1.1rem}
+  button{font-size:1rem;font-weight:600;padding:10px 18px;border:0;border-radius:8px;
+    background:var(--accent);color:#fff;cursor:pointer}
+  button.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+  .msg{margin-top:12px;color:var(--warn);font-weight:600;min-height:1.2em}
+  .hint{color:var(--muted);font-size:.9rem;margin-top:8px}
+  h2{font-size:1.15rem;margin:24px 0 8px}
+  h3{font-size:1rem;margin:18px 0 6px}
+  ol.steps{margin:8px 0 0;padding-left:22px}
+  ol.steps>li{margin:10px 0}
+  ul{padding-left:22px}
+  .ex{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:8px;padding:12px 14px;margin:10px 0}
+  .ex b{color:var(--ink)}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;
+    background:var(--chip);padding:1px 5px;border-radius:4px}
+  pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;
+    overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;
+    color:var(--code);line-height:1.5}
+  .tok{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--bg)}
+  .tok .lbl{font-weight:700;font-size:1.05rem}
+  .tok .jwt{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;
+    word-break:break-all;color:var(--code);margin:6px 0 10px}
+  .tok .flaws label{display:flex;gap:8px;align-items:flex-start;font-weight:400;
+    margin:5px 0;cursor:pointer}
+  .checks label{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;
+    border:1px solid var(--line);border-radius:8px;margin:7px 0;font-weight:400;cursor:pointer}
+  .map-row{display:flex;gap:12px;align-items:center;margin:8px 0;flex-wrap:wrap}
+  .map-row .att{flex:1;min-width:220px}
+  select{font-size:1rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;
+    background:var(--bg);color:var(--ink)}
+  .map-row select{flex:1;min-width:220px;width:auto}
+  .hidden{display:none}
+  footer{color:var(--muted);font-size:.85rem;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Практична 12 — персональне завдання</h1>
+  <p class="sub">Захист автентифікації й архітектури: аналіз JWT і threat modeling межі
+    сервіс↔сервіс (Zero Trust). Введіть свій user-id, виконайте завдання на сторінці та
+    завантажте відповіді для здачі.</p>
+
+  <div class="card">
+    <label for="num">Ваш ідентифікатор (user-id)</label>
+    <div class="row">
+      <input id="num" type="text" placeholder="напр. user1288" autocomplete="off" spellcheck="false">
+      <button id="go">Отримати завдання</button>
+    </div>
+    <div id="msg" class="msg"></div>
+    <div id="hint" class="hint"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Що і як робити</h2>
+    <p class="hint">Інструкція однакова для всіх. Токени декодуйте на <b>jwt.io</b>
+      (вставити токен → побачити header і payload). На сторінці вад не позначено.</p>
+    <ol class="steps">
+      <li><b>Аналіз JWT.</b> Для кожного токена визначте ваду: <code>alg=none</code>,
+        слабкий секрет, немає <code>exp</code>, або коректний (еталон).</li>
+      <li><b>Правила перевірки JWT.</b> Позначте всі правила <b>коректної</b> перевірки
+        токена на сервері.</li>
+      <li><b>Zero Trust.</b> За схемою сервісів позначте контролі для межі
+        <b>сервіс↔сервіс</b> (внутрішні виклики зараз без перевірки токена).</li>
+      <li><b>Ключ підпису.</b> Позначте всі <b>правильні</b> практики зберігання й
+        керування ключем підпису токенів.</li>
+      <li><b>Мапінг.</b> Кожній auth-атаці зіставте <b>захід</b>, що її зупиняє.</li>
+      <li><b>Здача.</b> <b>«Завантажити відповіді (JSON)»</b> → прикріпити до завдання.
+        Самоперевірки немає — оцінює викладач.</li>
+    </ol>
+
+    <h2>Приклад (на сторонніх даних)</h2>
+    <div class="ex"><b>Токен</b> із header <code>{"alg":"none"}</code> і порожнім підписом
+      → вада: <b>alg=none</b> (підпис не перевіряється). Токен без claim <code>exp</code>
+      → <b>безстроковий</b>.</div>
+    <div class="ex"><b>Zero Trust:</b> внутрішній виклик <code>Order→Auth</code> без токена
+      → додати mTLS + токен сервісу + deny-by-default.</div>
+    <div class="ex"><b>Ключ підпису:</b> секрет у коді застосунку → <b>вада</b>; правильно —
+      у Vault/KMS, з ротацією й окремими ключами на середовище.</div>
+    <div class="ex"><b>Мапінг:</b> «перебір слабкого секрету HS256» → <b>сильний
+      випадковий секрет + ротація ключа</b>.</div>
+  </div>
+
+  <div id="result" class="hidden">
+    <div class="card">
+      <div class="row" style="margin-bottom:6px">
+        <button class="ghost" id="dlAll">⬇ Завантажити відповіді (JSON)</button>
+      </div>
+      <h2 style="margin-top:0">Завдання — variant <span id="vnum"></span></h2>
+
+      <h3>Крок 1. Аналіз JWT (декодуйте на jwt.io)</h3>
+      <div id="tokens"></div>
+
+      <h3>Крок 2. Правила коректної перевірки JWT</h3>
+      <p class="hint">Позначте всі правильні правила.</p>
+      <div id="jwtrules" class="checks"></div>
+
+      <h3>Крок 3. Threat modeling: межа сервіс↔сервіс</h3>
+      <pre id="schema"></pre>
+      <p class="hint">Позначте контролі Zero Trust для внутрішніх викликів.</p>
+      <div id="zerotrust" class="checks"></div>
+
+      <h3>Крок 4. Керування ключем підпису токенів</h3>
+      <p class="hint">Позначте всі правильні практики зберігання й ротації ключа.</p>
+      <div id="secrets" class="checks"></div>
+
+      <h3>Крок 5. Мапінг auth-атака → захід</h3>
+      <div id="mapping"></div>
+
+      <div class="row" style="margin-top:18px">
+        <button id="dlAll2">⬇ Завантажити відповіді (JSON)</button>
+      </div>
+      <div id="savemsg" class="hint"></div>
+    </div>
+  </div>
+
+  <footer>
+    Усі токени й сервіси синтетичні; секрети фейкові. Файл відповідей має містити ваш user-id.
+  </footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let current = null;
+
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+async function loadVariant(id){
+  $("msg").textContent = "";
+  const base = `t/${id}/`;
+  let tokens, services, rules, map, meta;
+  try {
+    const [a,b,c,d,e] = await Promise.all([
+      fetch(base+"tokens.json",{cache:"no-store"}),
+      fetch(base+"services.json",{cache:"no-store"}),
+      fetch(base+"rules.json",{cache:"no-store"}),
+      fetch(base+"map.json",{cache:"no-store"}),
+      fetch(base+"meta.json",{cache:"no-store"}),
+    ]);
+    if(!a.ok||!b.ok||!c.ok||!d.ok||!e.ok) throw 0;
+    tokens=await a.json(); services=await b.json(); rules=await c.json();
+    map=await d.json(); meta=await e.json();
+  } catch(e){
+    $("result").classList.add("hidden");
+    $("msg").textContent = "Набору з таким user-id немає — перевірте id зі списку.";
+    return;
+  }
+
+  $("vnum").textContent = meta.variant ?? id;
+
+  // Крок 1: токени
+  const td = $("tokens"); td.innerHTML = "";
+  const flawHtml = (i) => tokens.flaw_options.map(o =>
+    `<label><input type="radio" name="tok_${i}" value="${esc(o.key)}"> ${esc(o.label)}</label>`).join("");
+  tokens.tokens.forEach((t, i) => {
+    const div = document.createElement("div");
+    div.className = "tok";
+    div.innerHTML = `<div class="lbl">Токен ${esc(t.label)}</div>`+
+      `<div class="jwt">${esc(t.jwt)}</div>`+
+      `<div class="flaws" data-label="${esc(t.label)}">${flawHtml(i)}</div>`;
+    td.appendChild(div);
+  });
+
+  // Крок 2: правила JWT
+  const jr = $("jwtrules"); jr.innerHTML = "";
+  rules.jwt_rules.forEach(o => {
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="checkbox" class="jr" data-key="${esc(o.key)}"><span>${esc(o.label)}</span>`;
+    jr.appendChild(lab);
+  });
+
+  // Крок 3: схема + zero trust
+  $("schema").textContent = services.schema || "";
+  const zt = $("zerotrust"); zt.innerHTML = "";
+  rules.zerotrust.forEach(o => {
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="checkbox" class="zt" data-key="${esc(o.key)}"><span>${esc(o.label)}</span>`;
+    zt.appendChild(lab);
+  });
+
+  // Крок 4: керування ключем підпису
+  const sc = $("secrets"); sc.innerHTML = "";
+  rules.secrets.forEach(o => {
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="checkbox" class="sc" data-key="${esc(o.key)}"><span>${esc(o.label)}</span>`;
+    sc.appendChild(lab);
+  });
+
+  // Крок 5: мапінг (select заходу на кожну атаку)
+  const md = $("mapping"); md.innerHTML = "";
+  const optionsHtml = `<option value="">— оберіть захід —</option>` +
+    map.controls.map(c => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join("");
+  map.attacks.forEach((att) => {
+    const div = document.createElement("div");
+    div.className = "map-row";
+    div.innerHTML = `<div class="att"><b>${esc(att)}</b></div>`+
+      `<select class="mapsel" data-att="${esc(att)}">${optionsHtml}</select>`;
+    md.appendChild(div);
+  });
+
+  current = { id, tokens: tokens.tokens };
+  $("result").classList.remove("hidden");
+  $("savemsg").textContent = "";
+  try { localStorage.setItem("pz12_id", id); } catch(e){}
+}
+
+function collectAnswers(){
+  let unanswered = 0;
+  const tokens = {};
+  current.tokens.forEach((t, i) => {
+    const sel = document.querySelector(`input[name="tok_${i}"]:checked`);
+    if(sel) tokens[t.label] = sel.value; else unanswered++;
+  });
+  const jwt_rules = [...document.querySelectorAll(".jr:checked")].map(c => c.dataset.key);
+  const zerotrust = [...document.querySelectorAll(".zt:checked")].map(c => c.dataset.key);
+  const secrets = [...document.querySelectorAll(".sc:checked")].map(c => c.dataset.key);
+  const mapping = {};
+  document.querySelectorAll(".mapsel").forEach(s => {
+    if(s.value) mapping[s.dataset.att] = s.value; else unanswered++;
+  });
+  return {
+    variant: current.id,
+    submitted_at: new Date().toISOString(),
+    tokens, jwt_rules, zerotrust, secrets, mapping,
+    _unanswered: unanswered,
+  };
+}
+
+function exportJson(){
+  if(!current) return;
+  const ans = collectAnswers();
+  const warnUn = ans._unanswered;
+  delete ans._unanswered;
+  const blob = new Blob([JSON.stringify(ans, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `pz12_${current.id}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  $("savemsg").textContent = warnUn
+    ? `Файл збережено. Увага: ${warnUn} пунктів без відповіді — можна дозаповнити й завантажити ще раз.`
+    : "Файл збережено. Прикріпіть його до завдання.";
+}
+
+$("go").addEventListener("click", () => {
+  const id = $("num").value.trim();
+  if(!id){ $("msg").textContent = "Введіть свій user-id."; return; }
+  loadVariant(encodeURIComponent(id));
+});
+$("num").addEventListener("keydown", e => { if(e.key==="Enter") $("go").click(); });
+$("dlAll").addEventListener("click", exportJson);
+$("dlAll2").addEventListener("click", exportJson);
+
+(async () => {
+  try {
+    const r = await fetch("t/index.json",{cache:"no-store"});
+    if(r.ok){
+      const list = await r.json();
+      if(list.length) $("hint").textContent =
+        `Доступно варіантів: ${list.length}. Ваш user-id — зі списку групи.`;
+    }
+  } catch(e){}
+  try { const last = localStorage.getItem("pz12_id"); if(last) $("num").value = last; } catch(e){}
+})();
+</script>
+</body>
+</html>
